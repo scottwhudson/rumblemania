@@ -3,6 +3,7 @@ require 'rest-client'
 require 'pry'
 require 'dotenv'
 require_relative './lib/game'
+require_relative './lib/error'
 
 Dotenv.load
 
@@ -18,8 +19,7 @@ class Rumble < Thor
   option :count
   option :strat
   def training_game
-    count    = options[:count].nil? ? 1       : options[:count].to_i
-    strategy = options[:strat].nil? ? :random : options[:strat].to_sym
+    count, strategy = validate_opts(options)
     i = 1
 
     count.times do
@@ -30,5 +30,26 @@ class Rumble < Thor
       i += 1
     end
   end
+
+  private
+
+  def validate_opts(opts)
+    count = if opts[:count]
+      raise OptsError, 'Count must be greater than 0' if opts[:count] < 1
+      opts[:count].to_i
+    else
+      1
+    end
+
+    strategy = if opts[:strategy]
+      raise OptsError, 'Invalid strategy type' unless STRATEGIES.includes?(opts[:strategy])
+      opts[:strategy].to_sym
+    else
+      :random
+    end
+
+    [count, strategy]
+  end
+
 
 end

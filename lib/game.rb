@@ -8,6 +8,8 @@ class Game
   attr_accessor :json
   attr_reader :moves
 
+  STRATEGIES = %w(random, move_sum, mixed)
+
   def initialize(strategy)
     @json = JSON.parse(fetch_json(load_config), object_class: OpenStruct)
     @moves = JSON.parse(RestClient.get(ENV['BASE_URI'] + '/moves/'))
