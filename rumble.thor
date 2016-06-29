@@ -16,13 +16,15 @@ class Rumble < Thor
 
   desc "training_game", "plays a game or set of games using the training endpoint and saves all of the game data to a YAML file in /data"
   option :count
+  option :strat
   def training_game
-    count = options[:count].to_i || 1
+    count    = options[:count].nil? ? 1       : options[:count].to_i
+    strategy = options[:strat].nil? ? :random : options[:strat].to_sym
     i = 1
 
     count.times do
       puts "playing game #{i} of #{count}"
-      game = Game.new
+      game = Game.new(strategy)
       game.play
       game.save_data
       i += 1

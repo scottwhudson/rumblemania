@@ -8,20 +8,16 @@ class Game
   attr_accessor :json
   attr_reader :moves
 
-  def initialize
+  def initialize(strategy)
     @json = JSON.parse(fetch_json(load_config), object_class: OpenStruct)
     @moves = JSON.parse(RestClient.get(ENV['BASE_URI'] + '/moves/'))
+    @strategy = strategy
   end
 
   def play
     until self.json.gamestate.moves_remaining == 0 do
-      opponent_move_count = count_moves(self.json.gamestate.opponent_moves)
-      your_move = calc_best_move(self.moves, opponent_move_count)
-
-      self.json.move = your_move
-
+      self.json.move = self.send(@strategy)
       self.json = JSON.parse(fetch_json(ostruct_to_hash(self.json)), object_class: OpenStruct)
-
       puts turn_report(self.json)
     end
   end
@@ -67,15 +63,21 @@ class Game
     return hash.max_by{|k,v| v}[0]
   end
 
-  def random_move
-    %w(A B C D E F G H I J K).sample
-  end
-
   def turn_report(game)
     "your move: #{game.gamestate.your_moves.last}, " +
     "opponents move: #{game.gamestate.opponent_move}, " +
     "total score: #{game.gamestate.total_score}, " +
     "moves remaining: #{game.gamestate.moves_remaining}"
+  end
+
+  # move strategy methods go here
+  def random
+    %w(A B C D E F G H I J K).sample
+  end
+
+  def move_sum
+    opp_move_count = count_moves(self.json.gamestate.opponent_moves)
+    return calc_best_move(self.moves, opp_move_count)
   end
 
 end
