@@ -9,6 +9,8 @@ Dotenv.load
 
 class Rumble < Thor
 
+  STRATEGIES = %w(random move_sum mixed)
+
   desc "opponents", "fetches a list of opponent names and slugs"
   def opponents
     opponents = JSON.parse(RestClient.get(ENV['BASE_URI'] + '/opponents/'))
@@ -35,15 +37,15 @@ class Rumble < Thor
 
   def validate_opts(opts)
     count = if opts[:count]
-      raise OptsError, 'Count must be greater than 0' if opts[:count] < 1
+      raise OptsError, 'Count must be greater than 0' if opts[:count].to_i < 1
       opts[:count].to_i
     else
       1
     end
 
-    strategy = if opts[:strategy]
-      raise OptsError, 'Invalid strategy type' unless STRATEGIES.includes?(opts[:strategy])
-      opts[:strategy].to_sym
+    strategy = if opts[:strat]
+      raise OptsError, 'Invalid strategy type' unless STRATEGIES.include?(opts[:strat])
+      opts[:strat].to_sym
     else
       :random
     end

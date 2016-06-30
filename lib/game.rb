@@ -8,8 +8,6 @@ class Game
   attr_accessor :json
   attr_reader :moves
 
-  STRATEGIES = %w(random, move_sum, mixed)
-
   def initialize(strategy)
     @json = JSON.parse(fetch_json(load_config), object_class: OpenStruct)
     @moves = JSON.parse(RestClient.get(ENV['BASE_URI'] + '/moves/'))
@@ -27,7 +25,9 @@ class Game
   def save_data
     puts "saving data"
 
-    File.open("./data/#{Time.now.to_i}#{self.json.gamestate.opponent}.yml", "w") {|f| f.write(ostruct_to_hash(self.json).to_yaml) }
+    File.open(generate_filename(self), "w") do |f|
+      f.write(ostruct_to_hash(self.json).to_yaml)
+    end
   end
 
   private
@@ -38,6 +38,10 @@ class Game
 
   def fetch_json(hash)
     RestClient.post("#{ENV['BASE_URI']}" + '/training/', hash.to_json, content_type: :json)
+  end
+
+  def generate_filename(game)
+    "./data/#{Time.now.to_i}#{game.json.gamestate.opponent}.yml"
   end
 
   def ostruct_to_hash(ostruct, hash = {})
