@@ -1,6 +1,6 @@
 # Rumblemania
 
-*Note: The project name was modified to be harder to search for on GitHub*
+##### Umbel Dev Challenge 
 
 ### Overview
 This ruby script plays a game by submitting moves to an AI opponent through a REST API.
