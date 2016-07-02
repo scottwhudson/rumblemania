@@ -9,7 +9,7 @@ Dotenv.load
 
 class Rumble < Thor
 
-  STRATEGIES = %w(random move_sum mixed markov)
+  STRATEGIES = %w(random move_sum mixed markov nbayes)
 
   desc "opponents", "fetches a list of opponent names and slugs"
   def opponents
