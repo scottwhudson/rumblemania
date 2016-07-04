@@ -52,7 +52,7 @@ class Strategy
       if @strategy == :markov
         dictionary.parse_string game[:gamestate][:opponent_moves].join(" ")
       elsif @strategy == :nbayes
-        opponent_moves = fetch_index_pairs(game)
+        opponent_moves = fetch_index_pairs(training_game)
         opponent_moves.each { |hash| dictionary.train(hash[1], hash[0]) }
       end
     end
@@ -101,7 +101,8 @@ class Strategy
   end
 
   # Queries the dictionary with move_index which returns a hash of all possible responses
-  # with their probabilities. We'll fetch the 5 most probable responses
+  # with their probabilities. We'll fetch the 5 most probable responses and return those to
+  # the caller
   #
   # @param move_index [Integer] index position of move
   def fetch_opponent_moves(move_index)
@@ -111,11 +112,16 @@ class Strategy
     opp_moves
   end
 
+  # returns the most common value in opponent_moves array of the game object
+  #
   # @param game [OpenStruct] json response from API containing all game data
   def count_moves(game)
     game.gamestate.opponent_moves.max_by(&:size)
   end
 
+  # Creates a hash containing the move letter as the key and an array of move
+  # indices as the value
+  #
   # @param game [OpenStruct] json response from API containing all game data
   def fetch_index_pairs(game, move_hash = {})
     @moves.each do |move|
@@ -126,7 +132,10 @@ class Strategy
     move_hash
   end
 
-  # @param game [OpenStruct] json response from API containing all game data
+  # iterates through the opponent_moves array of the provided game and returns
+  # array containing indices of move positions
+  #
+  # @param game [Hash] hash of historical game data used for training
   # @param move [String] single-letter move identifier (ex: "A")
   def fetch_indices(game, move, indices = [])
     game[:gamestate][:opponent_moves].each_with_index do |m, index|
