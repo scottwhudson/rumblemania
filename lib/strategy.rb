@@ -6,7 +6,7 @@ class Strategy
   # @param strategy [Symbol] type of strategy used in the current game
   # @param opponent [String] name of opponent in the current game
   def initialize(strategy, opponent)
-    @strategy = strategy
+    @type = strategy
     @opponent = opponent
     @moves = JSON.parse(RestClient.get(ENV['BASE_URI'] + '/moves/'))
     @dictionary = generate_dictionary
@@ -17,10 +17,10 @@ class Strategy
   #
   # @param game [OpenStruct] json response from API containing all game data
   def generate_response(game)
-    if @strategy == :random || @strategy == :markov
-      self.send(@strategy)
+    if @type == :random || @type == :markov
+      self.send(@type)
     else
-      self.send(@strategy, game)
+      self.send(@type, game)
     end
   end
 
@@ -29,9 +29,9 @@ class Strategy
   # creates new instance of dictionary object if using markov chains or
   # naive bayes and initializes the training of the dictionary
   def generate_dictionary
-    if @strategy == :markov
+    if @type == :markov
       dictionary = MarkyMarkov::TemporaryDictionary.new
-    elsif @strategy == :nbayes
+    elsif @type == :nbayes
       dictionary = NBayes::Base.new
     else
       return nil
@@ -49,9 +49,9 @@ class Strategy
     puts "training dictionary with #{training_games.count} files"
 
     training_games.each do |game|
-      if @strategy == :markov
+      if @type == :markov
         dictionary.parse_string game[:gamestate][:opponent_moves].join(" ")
-      elsif @strategy == :nbayes
+      elsif @type == :nbayes
         opponent_moves = fetch_index_pairs(training_game)
         opponent_moves.each { |hash| dictionary.train(hash[1], hash[0]) }
       end
@@ -147,7 +147,7 @@ class Strategy
 
   # Iterates through @moves to find move that will counter all possible opponent
   # moves using array subtraction.  If one is not found, the last element of the
-  # array is popped and the method recurses until a counter move is found.
+  # array is popped and the method recurses until a suitable counter move is found.
   #
   # @param opp_move_array [Array] expected moves the opponent will make this turn
   def counter_move(opp_move_array, optimal_move = nil)
