@@ -1,6 +1,16 @@
 require 'marky_markov'
 require 'nbayes'
 
+# Handles all logic related to in-game decision-making, using four primary
+# strategy types:
+# - random: returns a random response to the game object each turn
+# - move sum: counts the opponents moves each turn and counters based on which
+#     move occurs most frequently
+# - markov chain: uses a simple markov chain method to predict opponent moves
+#     based on training data fed to the class before the game begins
+# - naive bayes classifier: classifier is trained to understand which moves occur
+#     most frequently at a given point in the game and returns an array of most
+#     commonly played moves to be countered
 class Strategy
 
   # @param strategy [Symbol] type of strategy used in the current game
@@ -52,7 +62,7 @@ class Strategy
       if @type == :markov
         dictionary.parse_string game[:gamestate][:opponent_moves].join(" ")
       elsif @type == :nbayes
-        opponent_moves = fetch_index_pairs(training_game)
+        opponent_moves = fetch_index_pairs(game)
         opponent_moves.each { |hash| dictionary.train(hash[1], hash[0]) }
       end
     end

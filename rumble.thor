@@ -9,6 +9,7 @@ Dotenv.load
 
 class Rumble < Thor
 
+  # strategy params for CLI
   STRATEGIES = %w(random move_sum mixed markov nbayes)
 
   desc "opponents", "fetches a list of opponent names and slugs"
@@ -28,7 +29,7 @@ class Rumble < Thor
       puts "playing game #{i} of #{count}"
       game = Game.new(strategy)
       game.play
-      game.save_data unless strategy == :markov
+      game.save_data
       i += 1
     end
   end
